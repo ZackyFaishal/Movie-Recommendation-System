@@ -98,28 +98,28 @@ Eksplorasi Data berupa visualisasi dilakukan untuk memahami karakteristik data s
 Analisis dilakukan terhadap beberapa variabel penting berikut:
 
 1. **Distribusi Genre Film**
-![Genre Distribution]()
+![Genre Distribution](https://github.com/ZackyFaishal/Movie-Recommendation-System/blob/main/assets/distribusi_genre.png)
 
 - Genre film didominasi oleh beberapa genre populer seperti Drama, Comedy, dan Action.
 - Banyak film memiliki lebih dari satu genre; genre diformat dalam bentuk string dan kemudian diekstrak menjadi daftar untuk eksplorasi frekuensi.
 - Visualisasi menunjukkan dominasi beberapa genre tertentu yang dapat digunakan dalam model content-based filtering.
 
 2. **Distribusi Tahun Rilis Film**
-![Release Year Distribution]()
+![Release Year Distribution](https://github.com/ZackyFaishal/Movie-Recommendation-System/blob/main/assets/distribusi_tahun.png)
 
 - Sebagian besar film dirilis antara tahun 1980 hingga 2010, dengan puncak sekitar tahun 2000.
 - Terlihat adanya nilai ekstrem seperti tahun sebelum 1900 atau setelah 2025, yang perlu ditangani dalam proses pembersihan data.
 - Distribusi miring ke kiri menunjukkan kecenderungan lebih banyak film lama dibandingkan yang sangat baru dalam dataset.
 
 3. **Distribusi Nilai Rating**
-![Rating Distribution]()
+![Rating Distribution](https://github.com/ZackyFaishal/Movie-Recommendation-System/blob/main/assets/distribusi_rating.png)
 
 - Rating yang paling sering diberikan adalah 3.0 dan 4.0.
 - Sangat sedikit rating di bawah 1.0 atau maksimal 5.0, namun distribusi menunjukkan bahwa pengguna cenderung memberikan rating menengah ke atas.
 - Tidak ada rating kosong (0), karena hanya interaksi eksplisit yang dimasukkan ke dataset.
 
 4. **Jumlah Rating per Pengguna**
-![User Rating Count Distribution]()
+![User Rating Count Distribution](https://github.com/ZackyFaishal/Movie-Recommendation-System/blob/main/assets/distribusi_rating_pengguna.png)
 
 - Mayoritas pengguna memberikan kurang dari 50 rating.
 - Terdapat outlier yaitu pengguna yang sangat aktif memberikan lebih dari 500 rating.
@@ -135,7 +135,7 @@ Analisis dilakukan terhadap beberapa variabel penting berikut:
 ### Analisis Tambahan
 
 1. **Top 10 Film dengan Jumlah Rating Terbanyak**
-![Top 10 Movies by Ratings]()
+![Top 10 Movies by Ratings](https://github.com/ZackyFaishal/Movie-Recommendation-System/blob/main/assets/top10.png)
 
 - Film dengan judul paling populer menerima lebih dari 3000 rating.
 - Adanya gap signifikan antara film teratas dan sisanya mengindikasikan adanya bias popularitas.
@@ -180,7 +180,7 @@ Berikut ini adalah langkah-langkah yang dilakukan dalam proses persiapan data:
 
 8. **Memeriksa Outlier**
 - Melakukan pengecekan apakah ada nilai yang sangat berbeda dari nilai normal
-![outlier picture]()
+![outlier picture](https://github.com/ZackyFaishal/Movie-Recommendation-System/blob/main/assets/outlier.png)
 Hasil dan Analisis:<br>
 Visualisasi box plot akan menunjukkan beberapa titik di sisi kiri, yang merupakan film-film yang dirilis sebelum tahun 1900.
 
