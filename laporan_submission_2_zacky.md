@@ -22,6 +22,61 @@ Dengan menerapkan kedua metode ini, sistem diharapkan dapat memberikan rekomenda
 ## Dataset
 https://www.kaggle.com/datasets/parasharmanas/movie-recommendation-system
 
+### Informasi Dataset
+
+Dataset terdiri dari dua file utama: **movies.csv** dan **ratings.csv**.
+
+---
+
+## ## **1. movies.csv**
+
+### **Jumlah Baris dan Kolom**
+- Baris: **62.423**
+- Kolom: 3
+
+### **Kondisi Data**
+- Missing value: **0**
+- Duplikasi: **0**
+- Terdapat outlier tahun rilis <1900 dan >2025 → **valid**, tidak dihapus.
+
+### **Deskripsi Fitur**
+| Kolom | Deskripsi |
+|-------|-----------|
+| `movieId` | ID unik film |
+| `title` | Judul film + tahun rilis |
+| `genres` | Genre film, dipisahkan dengan `|` |
+
+### **Insight**
+- Genre dominan adalah **Drama**, **Comedy**, dan **Action**.
+- Sebagian besar film dirilis pada rentang **1980–2010**.
+
+---
+
+## ## **2. ratings.csv**
+
+### **Jumlah Baris dan Kolom**
+- Baris: **25.000.095**
+- Kolom: 4
+
+### **Kondisi Data**
+- Missing value: 0
+- Duplikasi: 0
+- Rating terbanyak berada pada nilai **3.0–4.0**.
+
+### **Deskripsi Fitur**
+| Kolom | Deskripsi |
+|-------|-----------|
+| `userId` | ID unik pengguna |
+| `movieId` | ID film |
+| `rating` | Rating skala 0.5–5.0 |
+| `timestamp` | Waktu pemberian rating |
+
+### **Insight**
+- Mayoritas pengguna memberikan sedikit rating (long-tail pattern).
+- Ada pengguna aktif dengan lebih dari 500 rating.
+
+---
+
 ## Business Understanding
 
 ### Problem Statements
@@ -125,7 +180,7 @@ Analisis dilakukan terhadap beberapa variabel penting berikut:
 - Terdapat outlier yaitu pengguna yang sangat aktif memberikan lebih dari 500 rating.
 - Distribusi ini menggambarkan pola long-tail umum pada sistem rekomendasi, di mana sebagian kecil pengguna memberikan kontribusi besar.
 
-#### Kesimpulan Analisa
+#### Inisight Analisa
 
 * Genre populer seperti Drama dan Comedy mendominasi dataset film.
 * Film dalam dataset sebagian besar dirilis antara 1980–2010.
@@ -141,135 +196,177 @@ Analisis dilakukan terhadap beberapa variabel penting berikut:
 - Adanya gap signifikan antara film teratas dan sisanya mengindikasikan adanya bias popularitas.
 
 
-#### Kesimpulan Analisa Tambahan
+#### Insight Analisa Tambahan
 
 * Genre drama, comedy, dan action merupakan yang paling dominan, penting untuk filtering berbasis konten.
 * Film-film populer mendominasi jumlah rating, berpotensi menyebabkan bias model jika tidak ditangani.
 * Hanya sebagian kecil pengguna yang sangat aktif memberikan rating, fenomena umum pada sistem rekomendasi dan perlu dipertimbangkan untuk fairness dan regularisasi model.
 
-## Persiapan Data
+## **Data Preparation**
 
-Tahap persiapan data bertujuan untuk memastikan bahwa data yang digunakan dalam sistem rekomendasi film sudah bersih, terstruktur, dan siap dianalisis lebih lanjut.
+Pada tahap ini dilakukan proses pembersihan dan transformasi data sebelum digunakan pada tahap pemodelan.  
+Sesuai catatan reviewer, proses seperti import library, load dataset, melihat isi data, memeriksa missing value, duplikasi, tipe data, dan outlier termasuk ke dalam **Data Understanding**, sehingga tidak dicantumkan kembali di bagian Data Preparation.
 
-#### Langkah-langkah Persiapan Data
+Tahap Data Preparation dalam proyek ini berfokus pada langkah-langkah berikut:
 
-Berikut ini adalah langkah-langkah yang dilakukan dalam proses persiapan data:
+---
 
-1. **Import Library**
-   - Melakukan import library yang dibutuhkan seperti `pandas`, `matplotlib.pyplot`, dan `seaborn` untuk membantu dalam manipulasi dan visualisasi data.
+### **1. Pembersihan Kolom Genre**
+Kolom `genres` dibersihkan dari simbol pemisah dan disusun ulang agar setiap genre dapat dikenali sebagai satuan kata.  
+Langkah ini penting untuk memastikan model dapat membaca fitur genre secara optimal ketika digunakan dalam proses ekstraksi fitur.
 
-2. **Load Dataset**
-   - Mengimpor dua file dataset utama yaitu:
-     - `movies.csv` berisi informasi tentang film.
-     - `ratings.csv` berisi informasi rating yang diberikan oleh pengguna terhadap film.
+**Insight:**  
+Pembersihan kolom ini membantu model dalam memahami komposisi genre masing-masing film dengan lebih baik.
 
-3. **Melihat Sekilas Data**
-   - Melihat beberapa baris pertama dari masing-masing dataset (`head()`) untuk memahami struktur kolom dan jenis data yang tersedia.
+---
 
-4. **Mengecek Ukuran Dataset**
-   - Menghitung jumlah baris dan kolom dalam dataset untuk mengetahui ukuran dataset yang akan digunakan.
+### **2. Ekstraksi Fitur Menggunakan TF-IDF**
+Pada rekomendasi berbasis konten, genre film diolah menggunakan metode **TF-IDF (Term Frequency–Inverse Document Frequency)**.  
+Metode ini mengukur seberapa penting suatu kata (genre) dalam sebuah film relatif terhadap keseluruhan dataset.
 
-5. **Mengecek Missing Values**
-   - Melakukan pengecekan apakah terdapat nilai kosong (missing values) dalam kedua dataset.
+**Insight:**  
+TF-IDF memperkuat genre unik dan membantu proses penghitungan kemiripan antar film secara lebih akurat.
 
-6. **Mengecek Data Duplikat**
-   - Memastikan tidak ada data ganda (duplikat) yang dapat menyebabkan bias dalam proses analisis dan modeling.
+---
 
-7. **Memeriksa Tipe Data**
-   - Memastikan tipe data pada kolom-kolom penting seperti `movieId`, `userId`, dan `rating` sudah sesuai (numerik) agar tidak terjadi error saat proses analisis dan modeling.
+### **3. Encoding User dan Movie**
+Agar model Deep Learning dapat memproses data pengguna dan film, kolom `userId` dan `movieId` dikonversi ke bentuk numerik terurut.  
+Setiap ID pengguna dan film diubah menjadi representasi angka kategori yang konsisten.
 
-8. **Memeriksa Outlier**
-- Melakukan pengecekan apakah ada nilai yang sangat berbeda dari nilai normal
-![outlier picture](https://github.com/ZackyFaishal/Movie-Recommendation-System/blob/main/assets/outlier.png)
-Hasil dan Analisis:<br>
-Visualisasi box plot akan menunjukkan beberapa titik di sisi kiri, yang merupakan film-film yang dirilis sebelum tahun 1900.
+**Insight:**  
+Encoding memungkinkan model pembelajaran mendalam mempelajari pola interaksi melalui embedding.
 
-Kesimpulan: Titik-titik ini adalah outlier statistik, tetapi bukan data yang salah. Ini adalah film-film historis yang valid. Untuk pembuatan model rekomendasi, data ini tidak perlu dihapus, namun kita perlu sadar akan keberadaannya.
+---
 
-9. **Penggabungan Dataset**
-- Menggabungkan kedua dataset (`movies.csv` dan `ratings.csv`) berdasarkan MOVIE ID
+### **4. Normalisasi Rating**
+Rating dinormalisasi ke dalam rentang **0–1** agar selaras dengan fungsi aktivasi yang digunakan pada model dan mempermudah proses pelatihan model Deep Learning.
 
-### Kesimpulan Persiapan Data
+**Insight:**  
+Normalisasi menjaga stabilitas pembelajaran dan mengurangi risiko error akibat perbedaan skala data.
 
-Dari hasil proses persiapan data yang telah dilakukan, dapat disimpulkan bahwa:
+---
 
-- Dataset **movies** dan **ratings** berhasil dimuat dengan baik.
-- Tidak ditemukan missing values maupun duplikasi yang signifikan dalam kedua dataset.
-- Struktur data dan tipe data sudah sesuai dengan kebutuhan analisis berikutnya.
-- Dataset telah siap digunakan untuk tahap selanjutnya, yaitu **Data Understanding** dan **Modeling Sistem Rekomendasi**.
+### **5. Pembagian Dataset (Train–Test Split)**
+Data dibagi menjadi dua subset, yaitu data latih (training) dan data uji (testing), dengan proporsi umum 80:20.  
+Pembagian ini diperlukan untuk mengevaluasi performa model pada data yang tidak pernah dilihat sebelumnya.
+
+**Insight:**  
+Pembagian dataset membantu memastikan bahwa model tidak hanya menghafal data latih (overfitting), tetapi juga mampu melakukan generalisasi.
+
+---
+
+### **6. Pembuatan Indeks Film untuk Content-Based Filtering**
+Dibuat pemetaan khusus yang menghubungkan judul film dengan indeks barisnya, sehingga sistem rekomendasi dapat mengambil film acuan dan film-film serupa secara cepat.
+
+**Insight:**  
+Indeks ini mempermudah proses pencarian film saat melakukan rekomendasi berbasis konten.
+
+---
+
+## **Kesimpulan Data Preparation**
+
+Tahap Data Preparation menghasilkan data yang:
+
+- Sudah dibersihkan dan disesuaikan untuk ekstraksi fitur genre.  
+- Memiliki representasi numerik untuk user dan film melalui encoding.  
+- Memiliki rating yang sudah dinormalisasi.  
+- Telah dibagi ke dalam data latih dan data uji untuk keperluan evaluasi.  
+- Siap digunakan untuk membangun model **Content-Based Filtering** dan **Neural Collaborative Filtering**.
+
+Dengan seluruh tahapan ini, data telah sepenuhnya siap untuk masuk ke proses pemodelan sistem rekomendasi.
 
 
 ## Model Development
 
-Pada tahap ini dilakukan pembangunan model sistem rekomendasi menggunakan dataset yang sudah dipersiapkan sebelumnya. Model dikembangkan dengan dua pendekatan utama yaitu **Content-Based Filtering** dan **Deep Learning-based Recommendation System**.
+Pada tahap ini dilakukan pembangunan sistem rekomendasi film menggunakan data yang telah melalui proses **Data Preparation**. Fokus pembahasan pada tahap ini adalah menjelaskan **cara kerja sistem**, **alur algoritma**, serta **bagaimana model menghasilkan rekomendasi**, sesuai dengan implementasi pada notebook.
+
+Dua pendekatan sistem rekomendasi yang dikembangkan adalah **Content-Based Filtering** dan **Deep Learning-based Recommendation System (Neural Collaborative Filtering)**.
+
+---
 
 ### Content-Based Filtering
 
-Pendekatan ini merekomendasikan film kepada user berdasarkan kemiripan konten film. Sistem akan menganalisis atribut film seperti genre dan judul untuk menemukan film yang mirip dengan film yang sebelumnya disukai oleh pengguna.
+Content-Based Filtering merupakan pendekatan sistem rekomendasi yang memberikan saran film berdasarkan **kemiripan konten antar film**. Pendekatan ini berasumsi bahwa pengguna akan menyukai film lain yang memiliki karakteristik konten serupa dengan film yang dijadikan acuan.
 
-#### Langkah-langkah Content-Based Filtering:
+Pada proyek ini, konten film direpresentasikan menggunakan **genre film**. Representasi numerik film telah dibangun pada tahap Data Preparation menggunakan **TF-IDF**, sehingga setiap film memiliki vektor fitur yang menggambarkan komposisi genre-nya.
 
-1. **Ekstraksi Fitur Teks**
-   - Menggabungkan berbagai fitur film seperti genre dan judul menjadi satu representasi teks.
-   - Proses ini dilakukan agar model bisa memahami informasi konten setiap film.
+Kemiripan antar film dihitung menggunakan **cosine similarity**, yaitu metrik yang mengukur tingkat kesamaan antara dua vektor fitur. Semakin tinggi nilai cosine similarity, semakin mirip dua film tersebut.
 
-2. **Transformasi Fitur Teks**
-   - Menggunakan metode TF-IDF untuk mengubah representasi teks menjadi format numerik (vector) sehingga bisa dihitung kemiripannya.
+#### Alur Kerja Content-Based Filtering
 
-3. **Penghitungan Similaritas**
-   - Menggunakan cosine similarity untuk mengukur seberapa mirip satu film dengan film lainnya.
+1. **Pemetaan Film ke Indeks Data**  
+   Sistem membuat pemetaan antara judul film dan indeks baris dataset untuk memudahkan proses pencarian film referensi secara efisien.
 
-4. **Membangun Fungsi Rekomendasi**
-   - Membuat fungsi rekomendasi yang dapat menerima input berupa judul film, lalu mengembalikan daftar film-film lain yang memiliki tingkat kemiripan konten paling tinggi.
+2. **Pemilihan Film Referensi**  
+   Pengguna memberikan input berupa judul atau kata kunci film yang akan dijadikan acuan rekomendasi.
 
-### Deep Learning-based Recommendation System (Model Neural Collaborative Filtering)
+3. **Perhitungan Kemiripan Konten**  
+   Sistem menghitung cosine similarity antara film referensi dengan seluruh film lain berdasarkan representasi vektor TF-IDF.
 
-Selain metode content-based, digunakan juga pendekatan deep learning untuk meningkatkan akurasi rekomendasi dengan memanfaatkan data interaksi pengguna.
+4. **Perankingan Film**  
+   Film-film diurutkan berdasarkan nilai kemiripan tertinggi ke terendah.
 
-Model deep learning yang dibangun adalah **Neural Collaborative Filtering (NCF)** berbasis **Multilayer Perceptron (MLP)**.
+5. **Pemilihan Top-N Rekomendasi**  
+   Sejumlah N film dengan tingkat kemiripan tertinggi dipilih sebagai hasil rekomendasi.
 
-#### Langkah-langkah Deep Learning-based Recommendation:
+Pendekatan ini bersifat **personal secara implisit**, karena rekomendasi ditentukan langsung oleh karakteristik konten film yang dipilih pengguna, tanpa mempertimbangkan preferensi pengguna lain.
 
-1. **Encoding User dan Movie**
-   - Mengonversi `userId` dan `movieId` menjadi format numerik menggunakan teknik encoding agar dapat diproses oleh neural network.
+---
 
-2. **Membentuk Embedding Layer**
-   - Membangun embedding layer untuk user dan movie.
-   - Setiap user dan movie direpresentasikan dalam vektor berdimensi tetap yang dipelajari selama training.
+### Deep Learning-based Recommendation System  
+### (Neural Collaborative Filtering)
 
-3. **Membangun Arsitektur Neural Network**
-   - Menggunakan beberapa hidden layer dengan aktivasi ReLU.
-   - Dropout digunakan untuk mengurangi risiko overfitting.
+Neural Collaborative Filtering (NCF) merupakan pendekatan sistem rekomendasi berbasis **deep learning** yang mempelajari **pola interaksi historis antara pengguna dan film** berdasarkan data rating. Berbeda dengan Content-Based Filtering, pendekatan ini tidak menggunakan fitur konten film, melainkan mempelajari hubungan laten (*latent factors*) dari data interaksi.
 
-4. **Menyiapkan Target dan Split Data**
-   - Target dari model adalah rating dari user terhadap movie.
-   - Dataset dibagi menjadi training set dan test set (biasanya 80:20) agar bisa dilakukan evaluasi model.
+Dalam model ini, setiap pengguna dan film direpresentasikan dalam bentuk **embedding vektor berdimensi rendah**. Embedding ini dipelajari selama proses pelatihan dan merepresentasikan preferensi pengguna serta karakteristik film secara laten.
 
-5. **Proses Training**
-   - Model dilatih menggunakan optimizer Adam dan loss function Mean Squared Error (MSE).
-   - Proses training dilakukan dalam beberapa epoch hingga model dapat mempelajari pola interaksi antara user dan movie.
+Embedding user dan film kemudian digabungkan dan diproses melalui jaringan saraf **Multilayer Perceptron (MLP)** untuk mempelajari hubungan non-linear antara pengguna dan film, sehingga model mampu menghasilkan prediksi rating yang lebih akurat.
 
-6. **Melakukan Prediksi**
-   - Model yang sudah dilatih digunakan untuk memprediksi rating user terhadap seluruh film yang belum pernah ditonton oleh user tersebut.
-   - Prediksi diurutkan berdasarkan skor tertinggi.
+#### Alur Kerja Deep Learning-based Recommendation
 
-7. **Membuat Fungsi Rekomendasi**
-   - Menghasilkan daftar top-N rekomendasi film untuk setiap user berdasarkan hasil prediksi dari model.
+1. **Representasi User dan Film**  
+   Setiap user dan movie direpresentasikan sebagai embedding vektor yang menyimpan informasi preferensi dan karakteristik laten.
 
-#### Kesimpulan Model Development
+2. **Pembelajaran Pola Interaksi**  
+   Model mempelajari hubungan antara embedding user dan film berdasarkan data rating historis melalui beberapa lapisan neural network.
 
-Pada tahap pengembangan model ini, telah dibangun dua jenis sistem rekomendasi:
+3. **Prediksi Rating**  
+   Model menghasilkan prediksi rating pengguna terhadap film-film yang belum pernah ditonton.
 
-- **Content-Based Filtering** yang menghasilkan rekomendasi berdasarkan kemiripan konten film.
-- **Deep Learning-based Recommendation (Neural Collaborative Filtering)** yang memanfaatkan pola interaksi historis antara user dan film.
+4. **Agregasi dan Perankingan Film**  
+   Hasil prediksi rating dikelompokkan berdasarkan pengguna, kemudian film diurutkan berdasarkan nilai prediksi tertinggi.
 
-Kedua pendekatan ini diharapkan dapat saling melengkapi dalam meningkatkan akurasi dan relevansi rekomendasi film kepada pengguna.
+5. **Pemilihan Top-N Rekomendasi**  
+   Sejumlah N film dengan prediksi rating tertinggi dipilih sebagai rekomendasi untuk pengguna tersebut.
 
-### Contoh Top 10 Rekomendasi
+Pendekatan ini mampu menghasilkan rekomendasi yang **lebih personal dan adaptif**, karena memanfaatkan pola interaksi historis pengguna secara langsung.
 
-#### Contoh Top 10 Content-Based Filtering
+---
 
-Mencari rekomendasi film yang mirip dengan judul **"Toy Story (1995)"**:
+### Kesimpulan Model Development
+
+Pada tahap Model Development, telah dibangun dua pendekatan sistem rekomendasi dengan alur kerja yang berbeda:
+
+- **Content-Based Filtering**, yang merekomendasikan film berdasarkan kemiripan konten antar film dan sesuai untuk skenario berbasis preferensi konten.
+- **Neural Collaborative Filtering**, yang memanfaatkan pola interaksi historis pengguna–film untuk menghasilkan rekomendasi yang lebih personal dan kompleks.
+
+Kedua pendekatan ini saling melengkapi dan menjadi dasar dalam menghasilkan sistem rekomendasi film yang relevan dan sesuai dengan preferensi pengguna.
+
+
+### Contoh Rekomendasi
+
+#### Contoh Hasil Rekomendasi (Content-Based Filtering)
+
+Bagian ini menampilkan contoh hasil rekomendasi film yang dihasilkan
+oleh sistem Content-Based Filtering. Daftar rekomendasi diperoleh
+berdasarkan mekanisme perhitungan kemiripan konten yang telah
+diimplementasikan pada notebook, dengan memanfaatkan fungsi
+rekomendasi yang tersedia.
+
+
+Sebagai ilustrasi, berikut adalah contoh daftar 10 film yang direkomendasikan
+oleh sistem berdasarkan film acuan "Toy Story (1995)":
+
 
 | MovieId | Title                           |
 | ------  | ------------------------------- |
@@ -288,9 +385,15 @@ Mencari rekomendasi film yang mirip dengan judul **"Toy Story (1995)"**:
 
 ---
 
-#### Contoh Top 10 Deep Learning-based Filtering
+### Contoh Hasil Rekomendasi (Deep Learning-based Filtering)
 
-Mencari rekomendasi film untuk **User-ID 1** berdasarkan model deep learning:
+Bagian ini menampilkan ilustrasi hasil rekomendasi film yang dihasilkan
+oleh model Neural Collaborative Filtering berdasarkan pola interaksi
+historis pengguna.
+
+Sebagai ilustrasi, berikut adalah contoh daftar 10 film yang direkomendasikan
+untuk User-ID 1 berdasarkan prediksi rating tertinggi:
+
 
 | MovieId | Title                                 |
 | ------  | ------------------------------------- |
@@ -345,8 +448,8 @@ Evaluasi dilakukan dengan tahapan berikut:
 
 | Metrik        | Nilai  |
 | :------------ | :----- |
-| Precision@10  | 0.1316 |
-| Recall@10     | 0.5469 |
+| Precision@10  | 0.5836 |
+| Recall@10     | 0.6853 |
 
 Nilai **Precision@10 sebesar 0.1316** menunjukkan bahwa sekitar **13,16%** dari 10 film teratas yang direkomendasikan adalah benar-benar relevan untuk pengguna.  
 Sedangkan **Recall@10 sebesar 0.5469** menunjukkan bahwa sistem berhasil mencakup sekitar **54,69%** dari total film relevan.
@@ -374,10 +477,10 @@ Selain itu, performa pada data validasi juga dievaluasi menggunakan **val_loss**
 
 | Metrik    | Nilai  |
 | :-------- | :----- |
-| Loss      | 0.0339 |
-| MAE       | 0.1007 |
-| Val_Loss  | 0.1524 |
-| Val_MAE   | 0.2737 |
+| Loss      | 0.0276 |
+| MAE       | 0.1259 |
+| Val_Loss  | 0.0272 |
+| Val_MAE   | 0.1249 |
 
 Model menunjukkan **loss training yang rendah (0.0339)** dan **MAE sebesar 0.1007**, yang menandakan bahwa model cukup baik dalam memprediksi rating user.
 
